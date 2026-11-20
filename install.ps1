@@ -21,8 +21,13 @@ function Find-Profile {
       Where-Object { $_.DirectoryName -notmatch 'node_modules' }
   }
   if ($hits.Count -eq 0) { throw 'No DSH profile found. Pass -Profile <dir>.' }
-  if ($hits.Count -gt 1) { Write-Host "Found several profiles, using: $($hits[0].DirectoryName)" }
-  return $hits[0].DirectoryName
+  if ($hits.Count -eq 1) { return $hits[0].DirectoryName }
+  $sorted = $hits | Sort-Object LastWriteTime -Descending
+  Write-Host 'Found several DSH profiles:'
+  foreach ($hit in $sorted) { Write-Host "  - $($hit.DirectoryName)" }
+  Write-Host "Using the most recently used one: $($sorted[0].DirectoryName)"
+  Write-Host 'Pass -Profile <dir> to choose another.'
+  return $sorted[0].DirectoryName
 }
 
 $profileDir = Find-Profile
@@ -30,18 +35,23 @@ Write-Host "profile : $profileDir"
 
 if (Test-Path "$InstallDir\.git") {
   Write-Host "update  : $InstallDir"
-  git -C $InstallDir pull --ff-only | Out-Null
+  git -C $InstallDir pull -q --ff-only 2>$null | Out-Null
 } else {
   Write-Host "clone   : $InstallDir"
   New-Item -ItemType Directory -Force -Path (Split-Path $InstallDir) | Out-Null
-  git clone --depth 1 $repo $InstallDir | Out-Null
+  git clone -q --depth 1 $repo $InstallDir 2>$null | Out-Null
 }
 
 $link = Join-Path $profileDir 'node_modules\@local\dsh-pin'
 if (-not (Test-Path $link)) {
   New-Item -ItemType Directory -Force -Path (Split-Path $link) | Out-Null
-  New-Item -ItemType Junction -Path $link -Target $InstallDir | Out-Null
-  Write-Host "link    : $link"
+  try {
+    New-Item -ItemType Junction -Path $link -Target $InstallDir -ErrorAction Stop | Out-Null
+    Write-Host "link    : junction $link"
+  } catch {
+    Write-Host "link    : junction not allowed here, copying files instead"
+    Copy-Item -Recurse -Force (Join-Path $InstallDir '*') $link
+  }
 } else {
   Write-Host "link    : exists"
 }
@@ -75,4 +85,4 @@ Set-Content -Path $tmp -Value $script -Encoding UTF8
 Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 
 Write-Host ''
-Write-Host 'Done. Restart DSH, then open a NEW session — its first user message gets pinned.'
+Write-Host 'Done. Restart DSH, then open a NEW session - its first user message gets pinned.'
