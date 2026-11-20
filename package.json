@@ -1,0 +1,8 @@
+{
+  "name": "@local/dsh-pin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "description": "Pin the first user message of a session into the system prompt so compaction cannot drop it."
+}
