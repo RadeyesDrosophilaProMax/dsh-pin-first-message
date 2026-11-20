@@ -22,14 +22,30 @@
 
 ## 安装
 
-### 1. 放插件目录
+### 一句命令（Windows PowerShell）
 
 ```powershell
-# 把仓库克隆到任意位置，例如 D:\DSHAI\dsh-pin
-git clone https://github.com/<你的用户名>/dsh-pin-first-message.git D:\DSHAI\dsh-pin
+irm https://raw.githubusercontent.com/RadeyesDrosophilaProMax/dsh-pin-first-message/main/install.ps1 | iex
 ```
 
-### 2. 注册到 profile
+它会自动：克隆仓库 → 建目录联接 → 写 `package.json` 依赖 → 追加 `cordis.patch.yml` 条目。
+profile 目录会自动查找，找不到时用 `-Profile` 指定：
+
+```powershell
+.\install.ps1 -Profile "D:\DSshuju\profiles\desktop"
+```
+
+完成后重启 DSH，**新建**会话就生效。
+
+### 手动安装
+
+#### 1. 克隆
+
+```powershell
+git clone https://github.com/RadeyesDrosophilaProMax/dsh-pin-first-message.git D:\DSHAI\dsh-pin
+```
+
+#### 2. 注册到 profile
 
 编辑 `<profile>\package.json`，在 `dependencies` 里加一行（路径改成你的）：
 
@@ -41,11 +57,11 @@ git clone https://github.com/<你的用户名>/dsh-pin-first-message.git D:\DSHA
 
 ```powershell
 New-Item -ItemType Junction `
-  -Path  "D:\DSShuju\profiles\desktop\node_modules\@local\dsh-pin" `
+  -Path  "<profile>\node_modules\@local\dsh-pin" `
   -Target "D:\DSHAI\dsh-pin"
 ```
 
-### 3. 加补丁条目
+#### 3. 加补丁条目
 
 在 profile 的 `cordis.patch.yml` 末尾追加：
 
