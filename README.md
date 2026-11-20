@@ -22,13 +22,34 @@
 
 ## 安装
 
-### 一句命令（Windows PowerShell）
+### 让 DSH 自己装（推荐）
+
+把下面这段**直接发给你正在用的 DSH**，让它自己执行：
+
+```
+帮我装一个 DSH 插件：执行这条命令，装完告诉我需要重启。
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/RadeyesDrosophilaProMax/dsh-pin-first-message/main/install.ps1 | iex"
+```
+
+DSH 会调用它的 pwsh 工具跑完克隆、联接、改配置、加补丁四步；它如果需要写权限，会自己请求授权。
+
+装完重启 DSH，新建会话即可生效。
+
+### 自己跑一条命令（Windows PowerShell）
 
 ```powershell
 irm https://raw.githubusercontent.com/RadeyesDrosophilaProMax/dsh-pin-first-message/main/install.ps1 | iex
 ```
 
 它会自动：克隆仓库 → 建目录联接 → 写 `package.json` 依赖 → 追加 `cordis.patch.yml` 条目。
+
+> 如果 `irm` 因本机 TLS 拦截失败，改用两步：
+>
+> ```powershell
+> git clone https://github.com/RadeyesDrosophilaProMax/dsh-pin-first-message.git "$env:USERPROFILE\DSHAI\dsh-pin"
+> powershell -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\DSHAI\dsh-pin\install.ps1"
+> ```
+
 profile 目录会自动查找，找不到时用 `-Profile` 指定：
 
 ```powershell
